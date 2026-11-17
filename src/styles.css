@@ -363,7 +363,7 @@ th{color:var(--mo);font-weight:500}
  box-shadow:0 4px 18px rgba(27,35,53,.07)
 }
 .thuonghieu img{box-shadow:0 3px 10px rgba(255,129,15,.2)}
-.dashboard{max-width:1440px;padding:0 26px 4px}
+.dashboard{max-width:1440px;padding:16px 26px 4px}
 .hero{min-height:clamp(208px,16.5vw,235px);margin-bottom:12px;border-radius:17px;box-shadow:0 9px 24px rgba(24,34,52,.16)}
 .hero:before{background:linear-gradient(90deg,rgba(8,15,22,.48) 0%,rgba(8,15,22,.3) 34%,rgba(8,15,22,.08) 70%,rgba(8,15,22,.02) 100%)}
 .hero:after{content:"";position:absolute;z-index:2;inset:0;pointer-events:none;background:linear-gradient(135deg,transparent 0 2.8%,rgba(255,129,15,.92) 3% 4.2%,transparent 4.4%),linear-gradient(315deg,transparent 0 2.8%,rgba(255,129,15,.88) 3% 4.2%,transparent 4.4%)}
@@ -436,7 +436,7 @@ th{color:var(--mo);font-weight:500}
 .site-footer{min-height:44px;padding:3px 22px;background:radial-gradient(ellipse at 50% 120%,rgba(255,129,15,.14),transparent 42%),linear-gradient(110deg,#171a22,#202736 55%,#171a22);border-top:3px solid #ff8a17}
 .footer-brand img{width:34px;height:34px}
 @media(max-width:1100px){
- .dashboard{padding:12px}
+ .dashboard{padding:14px 12px 12px}
  .hero{min-height:230px}
  .dashboard-layout{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"recent upcoming" "ranking ranking" "season squad" "side side";gap:14px}
  .dashboard-side{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto}
