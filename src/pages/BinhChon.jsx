@@ -4,7 +4,7 @@ const mo=k=>k.dang_mo&&new Date()>=new Date(k.bat_dau)&&new Date()<=new Date(k.k
 export default function BinhChon(){
  const {vaiTro,user,khach}=useAuth();const cao=!khach&&vaiTro==='super_admin';
  const [kys,setKys]=useState([]),[cts,setCts]=useState([]),[da,setDa]=useState([]),[kq,setKq]=useState({}),[chon,setChon]=useState({}),[loi,setLoi]=useState(''),[m,setM]=useState({hang_muc:'thang',ten:'',bat_dau:'',ket_thuc:''});
- async function tai(){const [a,b,c]=await Promise.all([supabase.from('voting_periods').select('*').order('id',{ascending:false}),supabase.from('players').select('id,ho_ten').eq('dang_hoat_dong',true),supabase.from('votes').select('period_id')]);
+ async function tai(){const [a,b,c]=await Promise.all([supabase.from('voting_periods').select('*').order('id',{ascending:false}),supabase.from('players').select('id,ho_ten').eq('dang_hoat_dong',true).eq('loai_thanh_vien','cau_thu'),supabase.from('votes').select('period_id')]);if(b.error){setLoi(`Không tải được danh sách cầu thủ: ${b.error.message}${b.error.message.includes('loai_thanh_vien')?' Hãy chạy migration 014_loai_thanh_vien_co_vu.sql trong Supabase SQL Editor.':''}`);return}
   setKys(a.data||[]);setCts(b.data||[]);setDa((c.data||[]).map(x=>x.period_id));
   const r={};for(const k of a.data||[]){const {data}=await supabase.rpc('get_voting_results',{pid:k.id});r[k.id]=data||[]}setKq(r)}
  useEffect(()=>{tai()},[]);

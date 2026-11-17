@@ -4,7 +4,7 @@ export default function DanhHieu(){
  const {vaiTro,khach}=useAuth();const cao=!khach&&vaiTro==='super_admin';const [ds,setDs]=useState([]),[cts,setCts]=useState([]),[mua,setMua]=useState([]),[loi,setLoi]=useState('');
  const [f,setF]=useState({player_id:'',ten_giai:GIAI[0],nam:new Date().getFullYear(),season_id:'',thanh_tich:''});
  const tai=()=>supabase.from('awards').select('*,player:players(ho_ten,anh_url),season:seasons(ten)').order('nam',{ascending:false}).then(({data})=>setDs(data||[]));
- useEffect(()=>{tai();supabase.from('players').select('id,ho_ten').then(({data})=>setCts(data||[]));supabase.from('seasons').select('*').then(({data})=>setMua(data||[]))},[]);
+ useEffect(()=>{tai();supabase.from('players').select('id,ho_ten').eq('loai_thanh_vien','cau_thu').then(({data,error})=>{if(error)setLoi(`Không tải được danh sách cầu thủ: ${error.message}${error.message.includes('loai_thanh_vien')?' Hãy chạy migration 014_loai_thanh_vien_co_vu.sql trong Supabase SQL Editor.':''}`);else setCts(data||[])});supabase.from('seasons').select('*').then(({data})=>setMua(data||[]))},[]);
  async function them(e){e.preventDefault();setLoi('');const {error}=await supabase.from('awards').insert({...f,player_id:+f.player_id,nam:+f.nam,season_id:f.season_id||null});if(error)setLoi('Không thêm được: '+error.message);else{setF({...f,thanh_tich:''});tai()}}
  const xoa=async a=>{if(confirm('Xóa danh hiệu này?')){await supabase.from('awards').delete().eq('id',a.id);tai()}};
  return <div className="page"><h1>Danh hiệu</h1>{loi&&<div className="loi">{loi}</div>}

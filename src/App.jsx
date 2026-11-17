@@ -48,7 +48,7 @@ export default function App(){
   <footer className="site-footer">
    <Link to="/" className="footer-brand"><img src="/logo.jpg" alt=""/><span><b>{DOI.ten}</b><small>{DOI.tenPhu}</small></span></Link>
    <p>“Cùng nhau viết tiếp hành trình rực rỡ”</p>
-   <span className="footer-copy">© {new Date().getFullYear()} {DOI.ten} {DOI.tenPhu}. By ducdang</span>
+   <span className="footer-copy">© {new Date().getFullYear()} {DOI.ten} {DOI.tenPhu}.</span>
   </footer>
  </div>
 }

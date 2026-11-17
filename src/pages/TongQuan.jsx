@@ -6,6 +6,7 @@ import Hero from '../components/Hero';
 import CupIcon from '../components/CupIcon';
 import {DOI} from '../constants/doiBong';
 import {maViTri} from '../constants/viTri';
+import {hienDiaDiem} from '../lib/diaDiem';
 
 const BANNER_TRAN_MAC_DINH={ganNhat:'/san-van-tran-gan-nhat.jpg',sapToi:'/san-van-tran-sap-toi.jpg'};
 
@@ -27,7 +28,7 @@ export default function TongQuan(){
    ]);
    if(!dangHien)return;
    const errors=[a.error,b.error,d.error].filter(Boolean);
-   if(errors.length)setLoi(`Không tải được dữ liệu: ${errors.map(error=>error.message).join('; ')}. Hãy kiểm tra Supabase và chạy migration 008_lich_thi_dau.sql.`);
+   if(errors.length){const canLoaiThanhVien=errors.some(error=>error.message.includes('loai_thanh_vien'));setLoi(`Không tải được dữ liệu: ${errors.map(error=>error.message).join('; ')}. ${canLoaiThanhVien?'Hãy chạy migration 014_loai_thanh_vien_co_vu.sql trong Supabase SQL Editor.':'Hãy kiểm tra Supabase và chạy migration 008_lich_thi_dau.sql.'}`)}
    if(banners.error)setLoi(`Không tải được ảnh banner trận đấu: ${banners.error.message}. Hãy chạy migration 013_quan_ly_banner_tran_dau.sql trong Supabase SQL Editor.`);
    setBuoi(a.data||[]);
    setCt(b.data||[]);
@@ -41,8 +42,9 @@ export default function TongQuan(){
    }
   }
   tai();
+  window.addEventListener('doi-bong:stats-updated',tai);
   const interval=setInterval(tai,60000);
-  return ()=>{dangHien=false;clearInterval(interval)};
+  return ()=>{dangHien=false;clearInterval(interval);window.removeEventListener('doi-bong:stats-updated',tai)};
  },[]);
 
  const buoiDaKetThuc=useMemo(()=>buoi.filter(t=>t.trang_thai==='da_thi_dau'),[buoi]);
@@ -54,8 +56,10 @@ export default function TongQuan(){
  const soTranHoaMua=buoiMua.filter(t=>Number(t.ban_thang)===Number(t.ban_thua)).length;
  const soTranThuaMua=buoiMua.filter(t=>Number(t.ban_thang)<Number(t.ban_thua)).length;
  const vuaPhat=ct.slice().sort((a,b)=>b.ban_thang-a.ban_thang)[0];
+ const dsVuaPhat=vuaPhat?.ban_thang>0?ct.filter(c=>Number(c.ban_thang)===Number(vuaPhat.ban_thang)).sort((a,b)=>a.ho_ten.localeCompare(b.ho_ten)):[];
  const danhHieu=giai[0];
  const dsThanhTich=ct.slice().sort((a,b)=>b.ban_thang-a.ban_thang||b.so_tran-a.so_tran||a.ho_ten.localeCompare(b.ho_ten));
+ const dsThanhTichHienThi=dsThanhTich.slice(0,5);
  const dsNoiBat=ct.slice().sort((a,b)=>b.ban_thang-a.ban_thang||b.so_tran-a.so_tran).slice(0,3);
 
  function BuoiCard({buoi:tr,tuongLai=false,className='',banner=''}){
@@ -70,7 +74,7 @@ export default function TongQuan(){
     </>}</div>
     <div className="session-side-mark">{tr.logo_doi_thu_url?<img src={tr.logo_doi_thu_url} alt={tr.doi_thu}/>:<span className="opponent-fc">FC</span>}<b>{tr.doi_thu?.toUpperCase()}</b></div>
    </div><div className={`session-meta${tuongLai?' has-location':''}`}>
-    {tuongLai?<>{tr.dia_diem&&<span><MapPin size={14}/>{tr.dia_diem}</span>}</>:<span><CalendarDays size={14}/>{ngay(tr.ngay_thi_dau)}</span>}
+    {tuongLai?<>{tr.dia_diem&&<span><MapPin size={14}/>{hienDiaDiem(tr.dia_diem)}</span>}</>:<span><CalendarDays size={14}/>{ngay(tr.ngay_thi_dau)}</span>}
    </div></>:<div className="session-empty">{tuongLai?'Chưa có trận đấu sắp tới':'Chưa có dữ liệu trận đấu'}</div>}
   </section>
  }
@@ -126,11 +130,11 @@ export default function TongQuan(){
     <div className="panel-title"><span><CupIcon size={34}/>Thành tích cá nhân</span><Link to="/bang-xep-hang">Xem tất cả <ArrowRight size={14}/></Link></div>
     <div className="home-ranking-total">Tổng số trận đã đấu: <b>{buoiDaKetThuc.length}</b></div>
     <div className="home-ranking-table">
-     <div className="home-ranking-head"><span>#</span><span>Tên cầu thủ</span><span>Số trận có mặt</span><span>Bàn thắng</span></div>
-     {dsThanhTich.map((c,i)=><div className={`home-ranking-row${i===0?' is-top':''}`} key={c.player_id}>
+     <div className="home-ranking-head"><span>Xếp hạng</span><span>Tên thành viên</span><span>Số trận có mặt</span><span>Bàn thắng</span></div>
+     {dsThanhTichHienThi.map((c,i)=><div className={`home-ranking-row${i===0?' is-top':''}`} key={c.player_id}>
       <span className={`home-ranking-number${i<3?` top-${i+1}`:''}`}>{i+1}</span>
       <span className="home-ranking-player">{c.anh_url?<img src={c.anh_url} alt="" loading="lazy"/>:<span className="home-ranking-avatar">{c.ho_ten?.[0]||'?'}</span>}<b>{c.ho_ten}</b></span>
-      <b className="home-ranking-stat">{c.so_tran}</b><b className="home-ranking-stat goals">{c.ban_thang}</b>
+      <b className="home-ranking-stat appearances" aria-label={`${c.so_tran} trận có mặt`}>{c.so_tran}</b><b className="home-ranking-stat goals">{c.ban_thang}</b>
      </div>)}
      {!dsThanhTich.length&&<div className="empty-match">Chưa có thống kê</div>}
     </div>
@@ -138,13 +142,13 @@ export default function TongQuan(){
    <aside className="dashboard-side">
     <section className="panel attendance-highlight">
      <div className="panel-title"><span><img className="top-scorer-shoe" src="/top-scorer-shoe-cutout.png" alt="" aria-hidden="true"/>Vua phá lưới</span><Link to="/bang-xep-hang">Thành tích <ArrowRight size={14}/></Link></div>
-     {vuaPhat&&vuaPhat.ban_thang>0?<div className="attendance-highlight-body">
-      {vuaPhat.anh_url?<img src={vuaPhat.anh_url} alt={vuaPhat.ho_ten}/>:<span className="attendance-highlight-avatar">{vuaPhat.ho_ten?.[0]}</span>}
-      <div><b>{vuaPhat.ho_ten}</b><small>{vuaPhat.ban_thang} bàn thắng</small></div>
-     </div>:<div className="empty-match">Chưa có dữ liệu bàn thắng.</div>}
+     {dsVuaPhat.length?<div className="attendance-highlight-list">{dsVuaPhat.map(c=><div className="attendance-highlight-body" key={c.player_id}>
+      {c.anh_url?<img src={c.anh_url} alt={c.ho_ten}/>:<span className="attendance-highlight-avatar">{c.ho_ten?.[0]}</span>}
+      <div><b>{c.ho_ten}</b><small>{c.ban_thang} bàn thắng</small></div>
+     </div>)}</div>:<div className="empty-match">Chưa có dữ liệu bàn thắng.</div>}
     </section>
     <section className={`panel award-card${danhHieu?.ten_giai==='Quả bóng vàng đội bóng'?' award-card-golden':''}`}>
-     <div className="panel-title"><span><Medal size={19}/>Danh hiệu tiêu biểu</span><Link to="/danh-hieu">Tất cả <ArrowRight size={14}/></Link></div>
+     <div className="panel-title"><span><img className="award-heading-icon" src="/danh-hieu-tieu-bieu.png" alt="" aria-hidden="true"/>Danh hiệu tiêu biểu</span><Link to="/danh-hieu">Tất cả <ArrowRight size={14}/></Link></div>
      {danhHieu?<div className="award-detail"><div className={`award-icon${danhHieu.ten_giai==='Quả bóng vàng đội bóng'?' award-icon-photo':''}`}>{danhHieu.ten_giai==='Quả bóng vàng đội bóng'?<img src="/qua-bong-vang.png" alt="Cầu thủ nâng cúp vàng"/>:<Trophy size={38}/>}</div><div><b>{danhHieu.ten_giai}</b><small>{danhHieu.nam} · {danhHieu.thanh_tich||danhHieu.player_id}</small></div></div>
      :<div className="award-detail"><div className="award-icon"><Medal size={38}/></div><div><b>{vuaPhat?.ho_ten||'Cùng tạo nên dấu ấn'}</b><small>{vuaPhat?`${vuaPhat.ban_thang} bàn thắng`:'Danh hiệu cuối năm sẽ được cập nhật tại đây'}</small></div></div>}
     </section>
