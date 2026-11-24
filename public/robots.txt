@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /quan-tri
+Disallow: /dang-nhap
+
+Sitemap: https://fcthaibinhcatholic.pages.dev/sitemap.xml
