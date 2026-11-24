@@ -24,7 +24,7 @@ export default function ThongKe(){
   let dangHien=true;
   async function tai(){
    const [cauThu,tran]=await Promise.all([
-    supabase.from('v_thong_ke_cau_thu').select('player_id,ho_ten,anh_url,loai_thanh_vien').eq('loai_thanh_vien','cau_thu').order('ho_ten'),
+    supabase.from('v_thong_ke_cau_thu').select('player_id,ho_ten,anh_url,loai_thanh_vien').order('ho_ten'),
     supabase.from('v_buoi_bong').select('match_id,ngay_thi_dau,doi_thu,trang_thai,ban_thang,ban_thua,so_co_mat').order('ngay_thi_dau')
    ]);
    if(!dangHien)return;
@@ -96,7 +96,7 @@ export default function ThongKe(){
   <section className="the stats-filter">
    <label>Năm<select value={nam} onChange={e=>setNam(e.target.value)}><option value="">Tất cả năm</option>{cacNam.map(n=><option key={n} value={n}>{n}</option>)}</select></label>
    <label>Tháng<select value={thang} onChange={e=>setThang(e.target.value)}><option value="">Cả năm</option>{THANG.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
-   <label>Thành viên<select value={id} onChange={e=>setId(e.target.value)}><option value="">Toàn đội</option>{ds.map(x=><option key={x.player_id} value={x.player_id}>{x.ho_ten}</option>)}</select></label>
+   <label>Thành viên<select value={id} onChange={e=>setId(e.target.value)}><option value="">Toàn đội</option>{ds.map(x=><option key={x.player_id} value={x.player_id}>{x.ho_ten}{x.loai_thanh_vien==='co_vu'?' (CĐV)':''}</option>)}</select></label>
   </section>
   <section className="stats-summary">
    <div className="the stats-kpi matches"><span className="stats-kpi-icon"><CalendarDays size={20}/></span><div><div className="nhan">{cauThuChon?'Trận có mặt':'Trận đã đấu'}</div><div className="so">{soTranCoMat}</div><small>{nhanKy}</small></div></div>

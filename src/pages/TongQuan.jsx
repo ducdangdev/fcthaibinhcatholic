@@ -59,7 +59,7 @@ export default function TongQuan(){
  const dsVuaPhat=vuaPhat?.ban_thang>0?ct.filter(c=>Number(c.ban_thang)===Number(vuaPhat.ban_thang)).sort((a,b)=>a.ho_ten.localeCompare(b.ho_ten)):[];
  const danhHieu=giai[0];
  const dsThanhTich=ct.slice().sort((a,b)=>b.ban_thang-a.ban_thang||b.so_tran-a.so_tran||a.ho_ten.localeCompare(b.ho_ten));
- const dsThanhTichHienThi=dsThanhTich.slice(0,5);
+ const dsThanhTichHienThi=dsThanhTich.slice(0,4);
  const dsNoiBat=ct.slice().sort((a,b)=>b.ban_thang-a.ban_thang||b.so_tran-a.so_tran).slice(0,3);
 
  function BuoiCard({buoi:tr,tuongLai=false,className='',banner=''}){
@@ -72,7 +72,7 @@ export default function TongQuan(){
    <div className={`session-feature-center${tuongLai?' is-upcoming':''}`}>{tuongLai?<><strong>{ngay(tr.ngay_thi_dau)}</strong><span>TRẬN TIẾP THEO</span><b className="match-vs">VS</b><small className={`match-status-badge match-status-${tr.trang_thai==='dang_thi_dau'?'live':'upcoming'}`}>{status}</small></>:<>
      <strong>{tr.ban_thang} <i>–</i> {tr.ban_thua}</strong><span>KẾT QUẢ TRẬN ĐẤU</span>
     </>}</div>
-    <div className="session-side-mark">{tr.logo_doi_thu_url?<img src={tr.logo_doi_thu_url} alt={tr.doi_thu}/>:<span className="opponent-fc">FC</span>}<b>{tr.doi_thu?.toUpperCase()}</b></div>
+    <div className="session-side-mark">{tr.logo_doi_thu_url?<img src={tr.logo_doi_thu_url} alt={tr.doi_thu}/>:<span className="opponent-fc">FC</span>}<b title={tr.doi_thu}>{tr.doi_thu?.toUpperCase()}</b></div>
    </div><div className={`session-meta${tuongLai?' has-location':''}`}>
     {tuongLai?<>{tr.dia_diem&&<span><MapPin size={14}/>{hienDiaDiem(tr.dia_diem)}</span>}</>:<span><CalendarDays size={14}/>{ngay(tr.ngay_thi_dau)}</span>}
    </div></>:<div className="session-empty">{tuongLai?'Chưa có trận đấu sắp tới':'Chưa có dữ liệu trận đấu'}</div>}
@@ -120,14 +120,14 @@ export default function TongQuan(){
       <div className="panel-title"><span><Users size={19}/>Thành viên nổi bật</span><Link to="/cau-thu">Xem tất cả <ArrowRight size={14}/></Link></div>
       <div className="featured-players">{dsNoiBat.map(c=><Link className="player-tile" to="/cau-thu" key={c.player_id}>
        <div className="player-photo">{c.anh_url?<img src={c.anh_url} alt={c.ho_ten}/>:<div className="player-initial">{c.ho_ten?.[0]}</div>}</div>
-       <b>{c.ho_ten}</b><small>{c.vi_tri?`${maViTri(c.vi_tri)||''} · ${c.vi_tri}`:'Thành viên'}</small><div className="player-stat"><Star size={13}/>{c.ban_thang} bàn</div>
+       <b>{c.ho_ten}</b><small>{c.vi_tri?`${maViTri(c.vi_tri)||''} · ${c.vi_tri}`:(c.loai_thanh_vien==='co_vu'?'Cổ động viên':'Thành viên')}</small><div className="player-stat"><Star size={13}/>{c.loai_thanh_vien==='co_vu'?`${c.so_tran} trận`:`${c.ban_thang} bàn`}</div>
       </Link>)}
       {!dsNoiBat.length&&<div className="empty-match">Chưa có dữ liệu thành viên</div>}</div>
      </section>
     </div>
    </div>
    <section className="panel ranking-card home-personal-ranking">
-    <div className="panel-title"><span><CupIcon size={34}/>Thành tích cá nhân</span><Link to="/bang-xep-hang">Xem tất cả <ArrowRight size={14}/></Link></div>
+    <div className="panel-title"><span><CupIcon size={20}/>Thành tích cá nhân</span><Link to="/bang-xep-hang">Xem tất cả <ArrowRight size={14}/></Link></div>
     <div className="home-ranking-total">Tổng số trận đã đấu: <b>{buoiDaKetThuc.length}</b></div>
     <div className="home-ranking-table">
      <div className="home-ranking-head"><span>Xếp hạng</span><span>Tên thành viên</span><span>Số trận có mặt</span><span>Bàn thắng</span></div>
