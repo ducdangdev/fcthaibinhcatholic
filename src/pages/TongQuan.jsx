@@ -23,7 +23,7 @@ export default function TongQuan(){
    const [a,b,d,banners]=await Promise.all([
     supabase.from('v_buoi_bong').select('*').order('ngay_thi_dau',{ascending:false}),
     supabase.from('v_thong_ke_cau_thu').select('*').eq('dang_hoat_dong',true),
-    supabase.from('awards').select('*').order('nam',{ascending:false}).order('id',{ascending:false}),
+    supabase.from('awards').select('*,player:players(ho_ten,anh_url)').order('nam',{ascending:false}).order('id',{ascending:false}),
     supabase.from('site_settings').select('setting_key,setting_value').in('setting_key',['match_banner_recent','match_banner_upcoming'])
    ]);
    if(!dangHien)return;
@@ -58,9 +58,9 @@ export default function TongQuan(){
  const vuaPhat=ct.slice().sort((a,b)=>b.ban_thang-a.ban_thang)[0];
  const dsVuaPhat=vuaPhat?.ban_thang>0?ct.filter(c=>Number(c.ban_thang)===Number(vuaPhat.ban_thang)).sort((a,b)=>a.ho_ten.localeCompare(b.ho_ten)):[];
  const danhHieu=giai[0];
- const dsThanhTich=ct.slice().sort((a,b)=>b.ban_thang-a.ban_thang||b.so_tran-a.so_tran||a.ho_ten.localeCompare(b.ho_ten));
+ const dsThanhTich=ct.slice().sort((a,b)=>(Number(b.ban_thang)||0)-(Number(a.ban_thang)||0)||(Number(b.so_tran)||0)-(Number(a.so_tran)||0)||(a.ho_ten||'').localeCompare(b.ho_ten||''));
  const dsThanhTichHienThi=dsThanhTich.slice(0,4);
- const dsNoiBat=ct.slice().sort((a,b)=>b.ban_thang-a.ban_thang||b.so_tran-a.so_tran).slice(0,3);
+ const dsNoiBat=ct.slice().sort((a,b)=>(Number(b.so_tran)||0)-(Number(a.so_tran)||0)||(Number(b.ban_thang)||0)-(Number(a.ban_thang)||0)||(a.ho_ten||'').localeCompare(b.ho_ten||'')).slice(0,3);
 
  function BuoiCard({buoi:tr,tuongLai=false,className='',banner=''}){
   const status=tr?.trang_thai==='dang_thi_dau'?'Đang diễn ra':tr?.trang_thai==='da_thi_dau'?'Đã kết thúc':'Sắp diễn ra';
@@ -120,7 +120,7 @@ export default function TongQuan(){
       <div className="panel-title"><span><Users size={19}/>Thành viên nổi bật</span><Link to="/cau-thu">Xem tất cả <ArrowRight size={14}/></Link></div>
       <div className="featured-players">{dsNoiBat.map(c=><Link className="player-tile" to="/cau-thu" key={c.player_id}>
        <div className="player-photo">{c.anh_url?<img src={c.anh_url} alt={c.ho_ten}/>:<div className="player-initial">{c.ho_ten?.[0]}</div>}</div>
-       <b>{c.ho_ten}</b><small>{c.vi_tri?`${maViTri(c.vi_tri)||''} · ${c.vi_tri}`:(c.loai_thanh_vien==='co_vu'?'Cổ động viên':'Thành viên')}</small><div className="player-stat"><Star size={13}/>{c.loai_thanh_vien==='co_vu'?`${c.so_tran} trận`:`${c.ban_thang} bàn`}</div>
+       <b>{c.ho_ten}</b><small>{c.vi_tri?`${maViTri(c.vi_tri)||''} · ${c.vi_tri}`:(c.loai_thanh_vien==='co_vu'?'Cổ động viên':'Thành viên')}</small><div className="player-stat"><Star size={13}/>{c.loai_thanh_vien==='co_vu'||!c.ban_thang?`${c.so_tran||0} trận`:`${c.ban_thang} bàn`}</div>
       </Link>)}
       {!dsNoiBat.length&&<div className="empty-match">Chưa có dữ liệu thành viên</div>}</div>
      </section>
@@ -147,10 +147,10 @@ export default function TongQuan(){
       <div><b>{c.ho_ten}</b><small>{c.ban_thang} bàn thắng</small></div>
      </div>)}</div>:<div className="empty-match">Chưa có dữ liệu bàn thắng.</div>}
     </section>
-    <section className={`panel award-card${danhHieu?.ten_giai==='Quả bóng vàng đội bóng'?' award-card-golden':''}`}>
+    <section className={`panel award-card${!danhHieu||danhHieu?.ten_giai==='Quả bóng vàng đội bóng'?' award-card-golden':''}`}>
      <div className="panel-title"><span><img className="award-heading-icon" src="/danh-hieu-tieu-bieu.png" alt="" aria-hidden="true"/>Danh hiệu tiêu biểu</span><Link to="/danh-hieu">Tất cả <ArrowRight size={14}/></Link></div>
-     {danhHieu?<div className="award-detail"><div className={`award-icon${danhHieu.ten_giai==='Quả bóng vàng đội bóng'?' award-icon-photo':''}`}>{danhHieu.ten_giai==='Quả bóng vàng đội bóng'?<img src="/qua-bong-vang.png" alt="Cầu thủ nâng cúp vàng"/>:<Trophy size={38}/>}</div><div><b>{danhHieu.ten_giai}</b><small>{danhHieu.nam} · {danhHieu.thanh_tich||danhHieu.player_id}</small></div></div>
-     :<div className="award-detail"><div className="award-icon"><Medal size={38}/></div><div><b>{vuaPhat?.ho_ten||'Cùng tạo nên dấu ấn'}</b><small>{vuaPhat?`${vuaPhat.ban_thang} bàn thắng`:'Danh hiệu cuối năm sẽ được cập nhật tại đây'}</small></div></div>}
+     {danhHieu?<div className="award-detail"><div className={`award-icon${danhHieu.ten_giai==='Quả bóng vàng đội bóng'?' award-icon-photo':''}`}>{danhHieu.ten_giai==='Quả bóng vàng đội bóng'?<img src="/qua-bong-vang.png" alt="Cầu thủ nâng cúp vàng"/>:<Trophy size={38}/>}</div><div><b>{danhHieu.ten_giai}</b><small>{danhHieu.nam} · {danhHieu.player?.ho_ten||danhHieu.thanh_tich||danhHieu.player_id}</small></div></div>
+     :<div className="award-detail"><div className="award-icon award-icon-photo"><img src="/qua-bong-vang.png" alt="Danh hiệu tiêu biểu"/></div><div><b>Danh hiệu tiêu biểu 2026</b><small>Danh hiệu cuối năm sẽ được cập nhật tại đây</small></div></div>}
     </section>
    </aside>
   </div>

@@ -23,7 +23,7 @@ export default function BangXepHang(){
   return()=>{dangHien=false;window.removeEventListener('doi-bong:stats-updated',tai)};
  },[]);
  const xepHang=useMemo(()=>ds.slice().sort((a,b)=>
-  b.ban_thang-a.ban_thang||b.so_tran-a.so_tran||a.ho_ten.localeCompare(b.ho_ten)
+  (Number(b.ban_thang)||0)-(Number(a.ban_thang)||0)||(Number(b.so_tran)||0)-(Number(a.so_tran)||0)||(a.ho_ten||'').localeCompare(b.ho_ten||'')
  ),[ds]);
 
  return <div className="page">
